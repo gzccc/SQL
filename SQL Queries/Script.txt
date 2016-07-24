@@ -1,0 +1,122 @@
+Query #1:
+SELECT topic.id, topic.description, count(*)
+
+from topic, blurt
+
+where blurt.blurtid=topic.id
+
+group by topic.id, topic.description
+
+Query #2:
+SELECT user.name, count(*)
+
+from user, celebrity, follow
+
+where user.email=celebrity.email and follow.followee=celebrity.email
+
+group by user.name
+
+Query #3:
+SELECT user.name, count(*)
+
+from user, celebrity, blurt
+
+where user.email=celebrity.email and celebrity.email=blurt.email
+
+group by user.name
+
+order by count(*) DESC
+
+Query #4:
+Select user.name
+
+from user, celebrity
+
+where user.email=celebrity.email and user.name not in 
+(
+SELECT user.name
+
+from user, celebrity, follow
+
+where user.email=celebrity.email and celebrity.email=follow.follower
+
+group by user.name)
+
+Query #5
+Select vendor.name, count(*)
+
+from vendor, vendor_ambassador, follow
+
+where vendor_ambassador.vendorid=vendor.id and 
+vendor_ambassador.email=follow.followee
+
+group by vendor.name
+
+Query#6
+select vendor.name, count(distinct blurt_analysis.email) as advertisementgap
+
+from blurt_analysis, vendor_topics, 
+vendor
+
+where blurt_analysis.topicid = vendor_topics.topicid and 
+
+vendor.id = vendor_topics.vendorid and blurt_analysis.email not in 
+(
+select user_ad.email
+
+from user_ad, advertisement
+
+where user_ad.adid=advertisement.id and vendor_topics.vendorid=advertisement.vendorid
+)
+
+group by vendor.name
+
+order by advertisementgap DESC
+
+Query #7
+select distinct a1.name, b1.name
+
+from blurt_analysis as a, 
+blurt_analysis as b, follow, user as a1, user as b1
+
+where a.topicid=b.topicid and b.email not in (
+
+select f.followee
+
+from follow as f
+ 
+where f.follower = a.email
+ ) 
+
+and a1.email=a.email and b1.email=b.email and 
+a.email!=b.email
+
+Query #8
+select distinct user1.email, user2.email, user3.email
+from user as user1, user as user2, user as user3
+where
+user1.email!=user3.email and user1.email!=user2.email
+
+and user3.email!=user2.email and
+user2.email in (
+select follow.followee
+from follow
+where follow.follower = user1.email)
+and
+user3.email in (
+select follow.followee
+from follow
+where follow.follower = user2.email)
+and
+user3.email not in (
+select follow.followee
+from follow
+where follow.follower = user1.email) 
+
+Query #9
+select topic.id, topic.description, location,  count(blurt.blurtid)
+from blurt, blurt_analysis as ba, topic
+where ba.blurtid = blurt.blurtid 
+and topic.id=ba.topicid
+group by topic.id, topic.description, location
+Having avg(sentiment)<0
